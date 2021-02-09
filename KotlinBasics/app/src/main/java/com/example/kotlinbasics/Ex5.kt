@@ -16,7 +16,7 @@ val data = populateData(
 
 fun main() {
     println(data.minOf { it.value })
-    println(data.map { it.value }.asIterable().average())
+    println(data.map { it.value }.average())
     data.filter { it.value > 100 }.forEach { print("${it.value} ") }
     println()
     data.groupBy { it.date }.forEach { group -> var value = ""; group.value.forEach { value += "${it.value} " }; println("${group.key} $value") }
