@@ -1,5 +1,9 @@
 package com.garmin.garminkaptain.data
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import java.time.LocalDate
+
 data class PointOfInterest(
     val id: Long,
     val mapLocation: MapLocation,
@@ -24,7 +28,7 @@ val poiList: List<PointOfInterest> = listOf(
         MapLocation(37.8180564724432, -122.52704143524173),
         "Point Bonita",
         "Anchorage",
-        ReviewSummary(3.4, 1)
+        ReviewSummary(3.0, 1)
     ),
     PointOfInterest(
         12975,

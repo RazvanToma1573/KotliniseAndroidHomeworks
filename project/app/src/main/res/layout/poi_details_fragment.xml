@@ -30,14 +30,14 @@
         android:layout_marginTop="@dimen/spacing_large"
         android:orientation="horizontal">
 
-        <RatingBar
+        <TextView
             android:id="@+id/poi_rating_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-           android:numStars="3"
-            android:isIndicator="true"/>
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            tools:text="Rating: 5.0" />
 
         <TextView
             android:id="@+id/poi_num_reviews_view"
@@ -46,7 +46,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-            tools:text="Review count: 3" />
+            tools:text="Review count: 5" />
     </LinearLayout>
 
     <Button
