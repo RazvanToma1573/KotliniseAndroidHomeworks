@@ -54,7 +54,7 @@ class PoiDetailsFragment : Fragment() {
                     poi.reviewSummary.numberOfReviews > 0
                 findViewById<Button>(R.id.poi_view_reviews_button).setOnClickListener {
                     findNavController().navigate(
-                        PoiListFragmentDirections.actionPoiListFragmentToPoiDetailsFragment(poi.id)
+                        PoiDetailsFragmentDirections.actionPoiDetailsFragmentToPoiReviewsFragment(poiId)
                     )
                 }
             }
