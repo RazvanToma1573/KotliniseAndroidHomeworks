@@ -1,10 +1,6 @@
-
-
 package com.garmin.garminkaptain.data
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import java.time.LocalDate
+import java.util.*
 
 data class PointOfInterest(
     val id: Long,
@@ -20,7 +16,7 @@ data class Review(
     val poiId: Long,
     val title: String,
     val comment: String,
-    val date: LocalDate
+    val date: Date
 )
 
 data class MapLocation(
@@ -33,8 +29,14 @@ data class ReviewSummary(
     val numberOfReviews: Int
 )
 
+val calendar: Calendar = Calendar.getInstance()
 
-@RequiresApi(Build.VERSION_CODES.O)
+fun setCalendar(year: Int, month: Int, day: Int): Date {
+    calendar.set(year, month, day)
+    return calendar.time
+}
+
+
 val reviewList: List<Review> = listOf(
     Review(
         12843,
@@ -43,7 +45,7 @@ val reviewList: List<Review> = listOf(
         "Go to Point Bonita in the summer",
         "Truly a majestic place. Everyone should have the change to see" +
                 "this beautiful place at least once in their lifetime.",
-        LocalDate.of(2018,6,22)
+        setCalendar(2018, 6, 22)
     ),
     Review(
         13543,
@@ -51,7 +53,7 @@ val reviewList: List<Review> = listOf(
         46067,
         "Don't go to Point Bonita in the summer",
         "Didn't like it...",
-        LocalDate.of(2019,6,18)
+        setCalendar(2019,6,18)
     ),
     Review(
         12312,
@@ -59,7 +61,7 @@ val reviewList: List<Review> = listOf(
         46085,
         "Go to Needles in the winter",
         "It's pretty cool!",
-        LocalDate.of(2020,6,18)
+        setCalendar(2020,6,18)
     ),
     Review(
         11312,
@@ -67,7 +69,7 @@ val reviewList: List<Review> = listOf(
         60928,
         "Don't go to Horseshoe Cove in the winter",
         "meh",
-        LocalDate.of(2020,6,18)
+        setCalendar(2020,6,18)
     ),
     Review(
         14312,
@@ -75,7 +77,7 @@ val reviewList: List<Review> = listOf(
         60928,
         "Don't go to Horseshoe Cove in the winter",
         "Not really interesting...",
-        LocalDate.of(2020,6,18)
+        setCalendar(2020,6,18)
     ),
 )
 
