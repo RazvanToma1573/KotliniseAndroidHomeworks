@@ -4,27 +4,32 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.garmin.garminkaptain.R
-import com.garmin.garminkaptain.data.poiList
+import com.garmin.garminkaptain.data.PointOfInterest
+import com.garmin.garminkaptain.viewModel.PoiViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 
 class PoiMapFragment : Fragment(R.layout.poi_map_fragment), GoogleMap.OnInfoWindowClickListener {
 
-    private val pointsOfInterest = poiList
+    private var pointsOfInterest = listOf<PointOfInterest>()
+    private val viewModel: PoiViewModel by activityViewModels()
     private lateinit var mapFragment: SupportMapFragment
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mapFragment = childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment
-        view.doOnLayout {
-            refreshMap()
-        }
+
+        viewModel.getPoiList().observe(viewLifecycleOwner, Observer {
+            it?.let {
+                pointsOfInterest = it
+                refreshMap()
+            }
+        })
     }
 
     override fun onInfoWindowClick(selectedMarker: Marker?) {

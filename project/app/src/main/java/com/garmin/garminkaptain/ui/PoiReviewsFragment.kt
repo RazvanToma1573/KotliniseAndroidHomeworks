@@ -6,12 +6,15 @@ import android.view.ViewGroup
 import android.widget.RatingBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.data.Review
 import com.garmin.garminkaptain.data.reviewList
+import com.garmin.garminkaptain.viewModel.PoiViewModel
 
 class PoiReviewsFragment : Fragment(R.layout.poi_review_fragment) {
 
@@ -51,15 +54,22 @@ class PoiReviewsFragment : Fragment(R.layout.poi_review_fragment) {
 
     }
 
-    private val allReviews = reviewList
-    private lateinit var reviews: List<Review>
+    private var reviews = listOf<Review>()
+    private var adapter = PoiReviewsAdapter()
+    private val viewModel: PoiViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        reviews = allReviews.filter { it.poiId == args.poiId }
         view.findViewById<RecyclerView>(R.id.poi_reviews_list).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
-            adapter = PoiReviewsAdapter()
+            adapter = this@PoiReviewsFragment.adapter
         }
+
+        viewModel.getReviewList(args.poiId).observe(viewLifecycleOwner, Observer {
+            it?.let {
+                reviews = it
+                adapter.notifyDataSetChanged()
+            }
+        })
     }
 }
