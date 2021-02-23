@@ -1,13 +1,28 @@
 package com.garmin.garminkaptain.model
 
+import com.garmin.garminkaptain.data.PointOfInterest
+import com.garmin.garminkaptain.data.Review
 import com.garmin.garminkaptain.data.poiList
 import com.garmin.garminkaptain.data.reviewList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 object PoiRepository {
 
-    fun getReviewList(poiId: Long) = reviewList.filter { it.poiId == poiId }
+    suspend fun getPoiList(): Flow<List<PointOfInterest>> = flow {
+        delay(2000)
+        emit(poiList)
+    }
 
-    fun getPoiList() = poiList
+    suspend fun getPoi(id: Long): Flow<PointOfInterest?> = flow {
+        delay(2000)
+        emit(poiList.find { it.id == id })
+    }
 
-    fun getPoi(id: Long) = poiList.find { it.id == id }
+    suspend fun getReviewList(poiId: Long) = flow<List<Review>> {
+        delay(2000)
+        emit(reviewList.filter { it.poiId == poiId })
+    }
+
 }

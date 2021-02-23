@@ -1,18 +1,22 @@
 package com.garmin.garminkaptain.viewModel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.garmin.garminkaptain.TAG
 import com.garmin.garminkaptain.data.PointOfInterest
 import com.garmin.garminkaptain.data.Review
 import com.garmin.garminkaptain.model.PoiRepository
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class PoiViewModel : ViewModel() {
 
     init {
         Log.d(TAG, "init called")
+    }
+
+    private val loadingLiveData: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
     }
 
     private val poiReviewListLiveData: MutableLiveData<List<Review>> by lazy {
@@ -23,13 +27,13 @@ class PoiViewModel : ViewModel() {
         MutableLiveData<List<PointOfInterest>>()
     }
 
-    private val poiLiveData: MutableLiveData<PointOfInterest> by lazy {
-        MutableLiveData<PointOfInterest>()
-    }
 
-    fun getPoi(id: Long): LiveData<PointOfInterest> {
-        loadPoi(id)
-        return poiLiveData
+    fun getPoi(id: Long): LiveData<PointOfInterest?> = liveData {
+        loadingLiveData.postValue(true)
+        PoiRepository.getPoi(id).collect {
+            emit(it)
+            loadingLiveData.postValue(false)
+        }
     }
 
     fun getPoiList(): LiveData<List<PointOfInterest>> {
@@ -42,17 +46,27 @@ class PoiViewModel : ViewModel() {
         return poiReviewListLiveData
     }
 
-    private fun loadReviewList(poiId: Long) {
-        poiReviewListLiveData.postValue(PoiRepository.getReviewList(poiId))
+    fun loadReviewList(poiId: Long) {
+        loadingLiveData.postValue(true)
+        viewModelScope.launch {
+            PoiRepository.getReviewList(poiId).collect {
+                poiReviewListLiveData.postValue(it)
+                loadingLiveData.postValue(false)
+            }
+        }
     }
 
-    private fun loadPoiList() {
-        poiListLiveData.postValue(PoiRepository.getPoiList())
+    fun loadPoiList() {
+        loadingLiveData.postValue(true)
+        viewModelScope.launch {
+            PoiRepository.getPoiList().collect {
+                poiListLiveData.postValue(it)
+                loadingLiveData.postValue(false)
+            }
+        }
     }
 
-    private fun loadPoi(id: Long) {
-        poiLiveData.postValue(PoiRepository.getPoi(id))
-    }
+    fun getLoading(): LiveData<Boolean> = loadingLiveData
 
     override fun onCleared() {
         super.onCleared()

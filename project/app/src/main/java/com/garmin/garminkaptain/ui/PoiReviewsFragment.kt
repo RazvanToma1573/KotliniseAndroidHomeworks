@@ -11,6 +11,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.data.Review
 import com.garmin.garminkaptain.data.reviewList
@@ -64,6 +65,12 @@ class PoiReviewsFragment : Fragment(R.layout.poi_review_fragment) {
             layoutManager = LinearLayoutManager(context)
             adapter = this@PoiReviewsFragment.adapter
         }
+
+        val swipeRefreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.swipeToRefreshReview)
+        swipeRefreshLayout.setOnRefreshListener { viewModel.loadPoiList() }
+
+        viewModel.getLoading()
+            .observe(viewLifecycleOwner, Observer { swipeRefreshLayout.isRefreshing = it })
 
         viewModel.getReviewList(args.poiId).observe(viewLifecycleOwner, Observer {
             it?.let {
