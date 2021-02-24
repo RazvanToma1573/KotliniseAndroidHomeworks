@@ -14,6 +14,16 @@ class PoiViewModel : ViewModel() {
 
     init {
         Log.d(TAG, "init called")
+        viewModelScope.launch {
+            while (true) {
+                Log.d(TAG, "getPoiList() every 5 seconds")
+                PoiRepository.getPoiList().collect {
+                    poiListLiveData.postValue(it)
+                    loadingLiveData.postValue(false)
+                }
+                delay(5000)
+            }
+        }
     }
 
     private val loadingLiveData: MutableLiveData<Boolean> by lazy {
@@ -58,14 +68,12 @@ class PoiViewModel : ViewModel() {
     }
 
     fun loadPoiList() {
+        Log.d(TAG, "loadPoiList() called")
         loadingLiveData.postValue(true)
         viewModelScope.launch {
-            while(true) {
-                PoiRepository.getPoiList().collect {
-                    poiListLiveData.postValue(it)
-                    loadingLiveData.postValue(false)
-                }
-                delay(5000)
+            PoiRepository.getPoiList().collect {
+                poiListLiveData.postValue(it)
+                loadingLiveData.postValue(false)
             }
         }
     }

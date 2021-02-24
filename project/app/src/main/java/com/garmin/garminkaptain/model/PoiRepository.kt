@@ -1,5 +1,7 @@
 package com.garmin.garminkaptain.model
 
+import android.util.Log
+import com.garmin.garminkaptain.TAG
 import com.garmin.garminkaptain.data.PointOfInterest
 import com.garmin.garminkaptain.data.Review
 import com.garmin.garminkaptain.data.poiList

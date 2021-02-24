@@ -31,7 +31,7 @@ val bookTypeList: List<String> = listOf(
     "Teaching"
 )
 
-fun getBookList(): List<Book> {
+suspend fun getBookList(): Flow<List<Book>> = flow {
     // get a "randomly" generated list of books
     val bookList: MutableList<Book> = mutableListOf()
     val numberOfBooks = Random.nextInt(1,6)
@@ -41,15 +41,21 @@ fun getBookList(): List<Book> {
         val indexType = Random.nextInt(0, bookTypeList.size)
         bookList.add(i, Book(bookNameList[indexName], bookTypeList[indexType]))
     }
-    return bookList
+    emit(bookList)
 }
 
-fun order(): Flow<Book> = flow {
-    val books = getBookList()
-    books.forEach {
-        val getBookTime = Random.nextLong(1, 7)
-        delay(getBookTime * 1000)
-        emit(it)
+suspend fun order(orderNumber: Int) {
+    getBookList().collect {
+        val deferreds: List<Deferred<Book>> = it.map {
+            GlobalScope.async {
+                val getBookTime = Random.nextLong(1, 7)
+                delay(getBookTime * 1000)
+                println("Got book for order $orderNumber: ${it.name} ${it.type}")
+                it
+            }
+        }
+        deferreds.awaitAll()
+        delay(4000)
     }
 }
 
@@ -58,11 +64,9 @@ fun main() {
     while (true) {
         // order books
         GlobalScope.launch {
-            val orderNumber = o
-            println("Order $orderNumber start...")
-            order().collect { println("Got book for order $orderNumber: ${it.name} ${it.type}") }
-            delay(4000)
-            println("Order $orderNumber done!")
+            val orderNumber = o;
+            getBookList()
+            order(orderNumber)
         }
         // wait 10 seconds
         runBlocking {
