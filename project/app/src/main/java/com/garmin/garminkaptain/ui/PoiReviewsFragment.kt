@@ -12,10 +12,12 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.garmin.garminkaptain.KaptainApplication
 import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.data.Review
 import com.garmin.garminkaptain.data.reviewList
 import com.garmin.garminkaptain.viewModel.PoiViewModel
+import com.garmin.garminkaptain.viewModel.PoiViewModelFactory
 
 class PoiReviewsFragment : Fragment(R.layout.poi_review_fragment) {
 
@@ -57,7 +59,7 @@ class PoiReviewsFragment : Fragment(R.layout.poi_review_fragment) {
 
     private var reviews = listOf<Review>()
     private var adapter = PoiReviewsAdapter()
-    private val viewModel: PoiViewModel by activityViewModels()
+    private val viewModel: PoiViewModel by activityViewModels { PoiViewModelFactory((activity?.application as KaptainApplication).repository) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         view.findViewById<RecyclerView>(R.id.poi_reviews_list).apply {

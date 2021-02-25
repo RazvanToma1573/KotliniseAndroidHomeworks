@@ -10,15 +10,16 @@ import com.garmin.garminkaptain.model.PoiRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.lang.IllegalArgumentException
 
-class PoiViewModel(application: Application) : AndroidViewModel(application) {
+class PoiViewModel(private val repository: PoiRepository) : ViewModel() {
 
     init {
         Log.d(TAG, "init called")
         viewModelScope.launch {
             while (true) {
                 Log.d(TAG, "getPoiList() every 5 seconds")
-                PoiRepository.getPoiList(getApplication()).collect {
+                repository.getPoiList().collect {
                     poiListLiveData.postValue(it)
                     loadingLiveData.postValue(false)
                 }
@@ -42,7 +43,7 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getPoi(id: Long): LiveData<PointOfInterest?> = liveData {
         loadingLiveData.postValue(true)
-        PoiRepository.getPoi(getApplication(), id).collect {
+        repository.getPoi(id).collect {
             emit(it)
             loadingLiveData.postValue(false)
         }
@@ -61,7 +62,7 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
     fun loadReviewList(poiId: Long) {
         loadingLiveData.postValue(true)
         viewModelScope.launch {
-            PoiRepository.getReviewList(getApplication(), poiId).collect {
+            repository.getReviewList(poiId).collect {
                 poiReviewListLiveData.postValue(it)
                 loadingLiveData.postValue(false)
             }
@@ -72,7 +73,7 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
         Log.d(TAG, "loadPoiList() called")
         loadingLiveData.postValue(true)
         viewModelScope.launch {
-            PoiRepository.getPoiList(getApplication()).collect {
+            repository.getPoiList().collect {
                 poiListLiveData.postValue(it)
                 loadingLiveData.postValue(false)
             }
@@ -86,4 +87,14 @@ class PoiViewModel(application: Application) : AndroidViewModel(application) {
         Log.d(TAG, "onCleared() called")
     }
 
+}
+
+class PoiViewModelFactory(private val repository: PoiRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(PoiViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return PoiViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

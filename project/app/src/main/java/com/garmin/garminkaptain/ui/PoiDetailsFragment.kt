@@ -18,10 +18,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.garmin.garminkaptain.KaptainApplication
 import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.TAG
 import com.garmin.garminkaptain.data.poiList
 import com.garmin.garminkaptain.viewModel.PoiViewModel
+import com.garmin.garminkaptain.viewModel.PoiViewModelFactory
 
 class PoiDetailsFragment : Fragment() {
 
@@ -31,7 +33,7 @@ class PoiDetailsFragment : Fragment() {
     //private val viewModel: PoiViewModel by activityViewModels()
 
     // Creates a different ViewModel for each Fragment
-    private val viewModel: PoiViewModel by viewModels()
+    private val viewModel: PoiViewModel by viewModels { PoiViewModelFactory((activity?.application as KaptainApplication).repository) }
 
     private lateinit var progressBar: ProgressBar
     private lateinit var group: Group

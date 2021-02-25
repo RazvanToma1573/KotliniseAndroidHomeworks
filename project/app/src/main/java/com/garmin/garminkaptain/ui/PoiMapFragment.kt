@@ -7,9 +7,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.garmin.garminkaptain.KaptainApplication
 import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.data.PointOfInterest
 import com.garmin.garminkaptain.viewModel.PoiViewModel
+import com.garmin.garminkaptain.viewModel.PoiViewModelFactory
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -18,7 +20,7 @@ import com.google.android.gms.maps.model.*
 class PoiMapFragment : Fragment(R.layout.poi_map_fragment), GoogleMap.OnInfoWindowClickListener {
 
     private var pointsOfInterest = listOf<PointOfInterest>()
-    private val viewModel: PoiViewModel by activityViewModels()
+    private val viewModel: PoiViewModel by activityViewModels { PoiViewModelFactory((activity?.application as KaptainApplication).repository) }
     private lateinit var mapFragment: SupportMapFragment
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

@@ -7,30 +7,20 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.garmin.garminkaptain.data.PoiDatabase
 import com.garmin.garminkaptain.data.poiList
 import com.garmin.garminkaptain.data.reviewList
+import com.garmin.garminkaptain.model.PoiRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class KaptainApplication : Application() {
 
-    lateinit var poiDatabase: PoiDatabase
+    val applicationScope = CoroutineScope(SupervisorJob())
 
-    val roomListener = object : RoomDatabase.Callback() {
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            super.onCreate(db)
-
-            GlobalScope.launch {
-                poiDatabase.getPoiDao().insertAllPoi(poiList)
-            }
-
-            GlobalScope.launch {
-                poiDatabase.getReviewDao().insertAllReview(reviewList)
-            }
-        }
-    }
+    val database by lazy { PoiDatabase.getInstance(applicationContext, applicationScope) }
+    val repository by lazy { PoiRepository(database.getPoiDao(), database.getReviewDao()) }
 
     override fun onCreate() {
         super.onCreate()
-
-        poiDatabase = Room.databaseBuilder(applicationContext, PoiDatabase::class.java, "poi-database").addCallback(roomListener).build()
     }
 }
