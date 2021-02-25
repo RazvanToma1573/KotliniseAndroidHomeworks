@@ -1,6 +1,7 @@
 package com.garmin.garminkaptain.model
 
 import android.util.Log
+import com.garmin.garminkaptain.KaptainApplication
 import com.garmin.garminkaptain.TAG
 import com.garmin.garminkaptain.data.PointOfInterest
 import com.garmin.garminkaptain.data.Review
@@ -12,19 +13,10 @@ import kotlinx.coroutines.flow.flow
 
 object PoiRepository {
 
-    suspend fun getPoiList(): Flow<List<PointOfInterest>> = flow {
-        delay(2000)
-        emit(poiList)
-    }
+    fun getPoiList(application: KaptainApplication): Flow<List<PointOfInterest>> = application.poiDatabase.getPoiDao().getAllPoi()
 
-    suspend fun getPoi(id: Long): Flow<PointOfInterest?> = flow {
-        delay(2000)
-        emit(poiList.find { it.id == id })
-    }
+    fun getPoi(application: KaptainApplication, id: Long): Flow<PointOfInterest> = application.poiDatabase.getPoiDao().getPoi(id)
 
-    suspend fun getReviewList(poiId: Long) = flow<List<Review>> {
-        delay(2000)
-        emit(reviewList.filter { it.poiId == poiId })
-    }
+    fun getReviewList(application: KaptainApplication, poiId: Long) : Flow<List<Review>> = application.poiDatabase.getReviewDao().getAllReview(poiId)
 
 }
