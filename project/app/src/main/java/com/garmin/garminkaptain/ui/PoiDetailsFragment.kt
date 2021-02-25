@@ -85,15 +85,15 @@ class PoiDetailsFragment : Fragment() {
         viewModel.getPoi(args.poiId).observe(viewLifecycleOwner, Observer { poi ->
             poi?.let {
                 group.visibility = VISIBLE
-                nameTextView.text = poi.name
-                typeTextView.text = poi.poiType
+                nameTextView.text = poi.pointOfInterest.name
+                typeTextView.text = poi.pointOfInterest.poiType
                 ratingTextView.text =
                     getString(R.string.label_rating, poi.reviewSummary.averageRating)
                 numReviewsTextView.text =
                     getString(R.string.label_num_reviews, poi.reviewSummary.numberOfReviews)
                 reviewsButton.setOnClickListener {
                     findNavController().navigate(
-                        PoiDetailsFragmentDirections.actionPoiDetailsFragmentToPoiReviewsFragment(poi.id)
+                        PoiDetailsFragmentDirections.actionPoiDetailsFragmentToPoiReviewsFragment(poi.pointOfInterest.id)
                     )
                 }
                 reviewsButton.isEnabled = poi.reviewSummary.numberOfReviews > 0

@@ -18,9 +18,11 @@ interface PoiDao {
     @Update
     suspend fun updatePoi(poi: PointOfInterest)
 
+    @Transaction
     @Query("SELECT * from poi_table")
-    fun getAllPoi(): Flow<List<PointOfInterest>>
+    fun getAllPoi(): Flow<List<PointOfInterestAndMapLocationAndReviewSummary>>
 
+    @Transaction
     @Query("SELECT * from poi_table WHERE id=:id")
-    fun getPoi(id: Long): Flow<PointOfInterest>
+    fun getPoi(id: Long): Flow<PointOfInterestAndMapLocationAndReviewSummary>
 }

@@ -6,11 +6,13 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = [PointOfInterest::class, Review::class], version = 1)
+@Database(entities = [PointOfInterest::class, Review::class, MapLocation::class, ReviewSummary::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class PoiDatabase : RoomDatabase() {
     abstract fun getPoiDao(): PoiDao
     abstract fun getReviewDao(): ReviewDao
+    abstract fun getMapLocationDao(): MapLocationDao
+    abstract fun getReviewSummaryDao(): ReviewSummaryDao
 
     private class PoiDatabaseCallback(
         private val scope: CoroutineScope
@@ -20,12 +22,14 @@ abstract class PoiDatabase : RoomDatabase() {
 
             INSTANCE?.let { database ->
                 scope.launch {
-                    populateDatabase(database.getPoiDao(), database.getReviewDao())
+                    populateDatabase(database.getPoiDao(), database.getReviewDao(), database.getMapLocationDao(), database.getReviewSummaryDao())
                 }
             }
         }
 
-        suspend fun populateDatabase(poiDao: PoiDao, reviewDao: ReviewDao) {
+        suspend fun populateDatabase(poiDao: PoiDao, reviewDao: ReviewDao, mapLocationDao: MapLocationDao, reviewSummaryDao: ReviewSummaryDao) {
+            mapLocationDao.insertAllMapLocations(mapLocationList)
+            reviewSummaryDao.insertAllReviewSummary(reviewSummaryList)
             poiDao.insertAllPoi(poiList)
             reviewDao.insertAllReview(reviewList)
         }

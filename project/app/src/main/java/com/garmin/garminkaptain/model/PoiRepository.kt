@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.flow
 
 class PoiRepository(private val poiDao: PoiDao, private val reviewDao: ReviewDao) {
 
-    fun getPoiList(): Flow<List<PointOfInterest>> = poiDao.getAllPoi()
+    fun getPoiList(): Flow<List<PointOfInterestAndMapLocationAndReviewSummary>> = poiDao.getAllPoi()
 
-    fun getPoi(id: Long): Flow<PointOfInterest> = poiDao.getPoi(id)
+    fun getPoi(id: Long): Flow<PointOfInterestAndMapLocationAndReviewSummary> = poiDao.getPoi(id)
 
     fun getReviewList(poiId: Long): Flow<List<Review>> = reviewDao.getAllReview(poiId)
 

@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.garmin.garminkaptain.KaptainApplication
 import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.data.PointOfInterest
+import com.garmin.garminkaptain.data.PointOfInterestAndMapLocationAndReviewSummary
 import com.garmin.garminkaptain.viewModel.PoiViewModel
 import com.garmin.garminkaptain.viewModel.PoiViewModelFactory
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -19,7 +20,7 @@ import com.google.android.gms.maps.model.*
 
 class PoiMapFragment : Fragment(R.layout.poi_map_fragment), GoogleMap.OnInfoWindowClickListener {
 
-    private var pointsOfInterest = listOf<PointOfInterest>()
+    private var pointsOfInterest = listOf<PointOfInterestAndMapLocationAndReviewSummary>()
     private val viewModel: PoiViewModel by activityViewModels { PoiViewModelFactory((activity?.application as KaptainApplication).repository) }
     private lateinit var mapFragment: SupportMapFragment
 
@@ -41,7 +42,7 @@ class PoiMapFragment : Fragment(R.layout.poi_map_fragment), GoogleMap.OnInfoWind
             }
             poi?.let {
                 findNavController().navigate(
-                    PoiMapFragmentDirections.actionPoiMapFragmentToPoiDetailsFragment(it.id)
+                    PoiMapFragmentDirections.actionPoiMapFragmentToPoiDetailsFragment(it.pointOfInterest.id)
                 )
             }
         }
@@ -54,7 +55,7 @@ class PoiMapFragment : Fragment(R.layout.poi_map_fragment), GoogleMap.OnInfoWind
             pointsOfInterest.forEach { poi ->
                 LatLng(poi.mapLocation.latitude, poi.mapLocation.longitude).also {
                     latLngBoundsBuilder.include(it)
-                    map.addMarker(MarkerOptions().position(it).title(poi.name))
+                    map.addMarker(MarkerOptions().position(it).title(poi.pointOfInterest.name))
                 }
             }
             map.animateCamera(

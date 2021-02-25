@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.garmin.garminkaptain.TAG
 import com.garmin.garminkaptain.data.PointOfInterest
+import com.garmin.garminkaptain.data.PointOfInterestAndMapLocationAndReviewSummary
 import com.garmin.garminkaptain.data.Review
 import com.garmin.garminkaptain.model.PoiRepository
 import kotlinx.coroutines.delay
@@ -36,12 +37,12 @@ class PoiViewModel(private val repository: PoiRepository) : ViewModel() {
         MutableLiveData<List<Review>>()
     }
 
-    private val poiListLiveData: MutableLiveData<List<PointOfInterest>> by lazy {
-        MutableLiveData<List<PointOfInterest>>()
+    private val poiListLiveData: MutableLiveData<List<PointOfInterestAndMapLocationAndReviewSummary>> by lazy {
+        MutableLiveData<List<PointOfInterestAndMapLocationAndReviewSummary>>()
     }
 
 
-    fun getPoi(id: Long): LiveData<PointOfInterest?> = liveData {
+    fun getPoi(id: Long): LiveData<PointOfInterestAndMapLocationAndReviewSummary?> = liveData {
         loadingLiveData.postValue(true)
         repository.getPoi(id).collect {
             emit(it)
@@ -49,7 +50,7 @@ class PoiViewModel(private val repository: PoiRepository) : ViewModel() {
         }
     }
 
-    fun getPoiList(): LiveData<List<PointOfInterest>> {
+    fun getPoiList(): LiveData<List<PointOfInterestAndMapLocationAndReviewSummary>> {
         loadPoiList()
         return poiListLiveData
     }

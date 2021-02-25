@@ -15,6 +15,7 @@ import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.data.PointOfInterest
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.garmin.garminkaptain.KaptainApplication
+import com.garmin.garminkaptain.data.PointOfInterestAndMapLocationAndReviewSummary
 import com.garmin.garminkaptain.viewModel.PoiViewModel
 import com.garmin.garminkaptain.viewModel.PoiViewModelFactory
 
@@ -24,12 +25,12 @@ class PoiListFragment : Fragment(R.layout.poi_list_fragment) {
         private val nameView = itemView.findViewById<TextView>(R.id.poi_item_name_view)
         private val typeView = itemView.findViewById<TextView>(R.id.poi_item_type_view)
 
-        fun bind(poi: PointOfInterest) {
-            nameView.text = poi.name
-            typeView.text = poi.poiType
+        fun bind(poi: PointOfInterestAndMapLocationAndReviewSummary) {
+            nameView.text = poi.pointOfInterest.name
+            typeView.text = poi.pointOfInterest.poiType
             itemView.setOnClickListener {
                 findNavController().navigate(
-                    PoiListFragmentDirections.actionPoiListFragmentToPoiDetailsFragment(poi.id)
+                    PoiListFragmentDirections.actionPoiListFragmentToPoiDetailsFragment(poi.pointOfInterest.id)
                 )
             }
         }
@@ -51,7 +52,7 @@ class PoiListFragment : Fragment(R.layout.poi_list_fragment) {
         override fun getItemCount(): Int = pointsOfInterest.size
     }
 
-    private var pointsOfInterest = listOf<PointOfInterest>()
+    private var pointsOfInterest = listOf<PointOfInterestAndMapLocationAndReviewSummary>()
     private var adapter = PoiListAdapter()
     private val viewModel: PoiViewModel by activityViewModels { PoiViewModelFactory((activity?.application as KaptainApplication).repository) }
 
