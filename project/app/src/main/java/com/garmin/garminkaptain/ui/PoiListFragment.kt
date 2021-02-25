@@ -4,20 +4,21 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.garmin.garminkaptain.R
-import com.garmin.garminkaptain.data.PointOfInterest
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.garmin.garminkaptain.KaptainApplication
+import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.data.PointOfInterestAndMapLocationAndReviewSummary
 import com.garmin.garminkaptain.viewModel.PoiViewModel
 import com.garmin.garminkaptain.viewModel.PoiViewModelFactory
+
 
 class PoiListFragment : Fragment(R.layout.poi_list_fragment) {
 
@@ -52,6 +53,28 @@ class PoiListFragment : Fragment(R.layout.poi_list_fragment) {
         override fun getItemCount(): Int = pointsOfInterest.size
     }
 
+    var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback = object :
+        ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.DOWN or ItemTouchHelper.UP
+        ) {
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
+            Toast.makeText(context, "on Move", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
+            val position = viewHolder.adapterPosition
+            viewModel.removePoi(pointsOfInterest[position])
+            Toast.makeText(context, pointsOfInterest[position].pointOfInterest.name + " deleted", Toast.LENGTH_SHORT).show()
+            adapter.notifyDataSetChanged()
+        }
+    }
+
     private var pointsOfInterest = listOf<PointOfInterestAndMapLocationAndReviewSummary>()
     private var adapter = PoiListAdapter()
     private val viewModel: PoiViewModel by activityViewModels { PoiViewModelFactory((activity?.application as KaptainApplication).repository) }
@@ -62,6 +85,9 @@ class PoiListFragment : Fragment(R.layout.poi_list_fragment) {
             layoutManager = LinearLayoutManager(context)
             adapter = this@PoiListFragment.adapter
         }
+
+        val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
+        itemTouchHelper.attachToRecyclerView(view.findViewById(R.id.poi_list))
 
         val swipeRefreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.swipeToRefresh)
         swipeRefreshLayout.setOnRefreshListener { viewModel.loadPoiList() }

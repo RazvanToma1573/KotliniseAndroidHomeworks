@@ -41,7 +41,6 @@ class PoiViewModel(private val repository: PoiRepository) : ViewModel() {
         MutableLiveData<List<PointOfInterestAndMapLocationAndReviewSummary>>()
     }
 
-
     fun getPoi(id: Long): LiveData<PointOfInterestAndMapLocationAndReviewSummary?> = liveData {
         loadingLiveData.postValue(true)
         repository.getPoi(id).collect {
@@ -53,6 +52,12 @@ class PoiViewModel(private val repository: PoiRepository) : ViewModel() {
     fun getPoiList(): LiveData<List<PointOfInterestAndMapLocationAndReviewSummary>> {
         loadPoiList()
         return poiListLiveData
+    }
+
+    fun removePoi(poi: PointOfInterestAndMapLocationAndReviewSummary) {
+        viewModelScope.launch {
+            repository.deletePoi(poi)
+        }
     }
 
     fun getReviewList(poiId: Long): LiveData<List<Review>> {

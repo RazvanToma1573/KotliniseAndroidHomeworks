@@ -14,6 +14,11 @@ class PoiRepository(private val poiDao: PoiDao, private val reviewDao: ReviewDao
 
     fun getPoi(id: Long): Flow<PointOfInterestAndMapLocationAndReviewSummary> = poiDao.getPoi(id)
 
+    suspend fun deletePoi(poi: PointOfInterestAndMapLocationAndReviewSummary) {
+        reviewDao.deleteAllByPoiId(poi.pointOfInterest.id)
+        poiDao.deletePoi(poi.pointOfInterest)
+    }
+
     fun getReviewList(poiId: Long): Flow<List<Review>> = reviewDao.getAllReview(poiId)
 
 }
