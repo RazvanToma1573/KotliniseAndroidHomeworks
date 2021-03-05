@@ -28,26 +28,27 @@
         app:layout_constraintTop_toBottomOf="@+id/poi_name_view"
         tools:text="Bridge" />
 
-    <TextView
+    <RatingBar
         android:id="@+id/poi_rating_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/spacing_large"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-        app:layout_constraintEnd_toStartOf="@+id/poi_num_reviews_view"
+        android:isIndicator="true"
+        android:numStars="5"
+        android:stepSize="0.1"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/poi_type_view"
-        tools:text="Rating: 5.0" />
+        tools:rating="4.5" />
 
     <TextView
         android:id="@+id/poi_num_reviews_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_large"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/poi_rating_view"
-        app:layout_constraintTop_toBottomOf="@+id/poi_type_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/poi_rating_view"
         tools:text="Review count: 5" />
 
     <Button
@@ -59,7 +60,7 @@
         android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/poi_rating_view" />
+        app:layout_constraintTop_toBottomOf="@+id/poi_num_reviews_view" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/poi_details_group"
@@ -69,7 +70,7 @@
         app:constraint_referenced_ids="poi_name_view, poi_num_reviews_view, poi_rating_view, poi_type_view, poi_view_reviews_button" />
 
     <ProgressBar
-        android:id="@+id/poi_progress"
+        android:id="@+id/poi_progress_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

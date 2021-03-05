@@ -9,44 +9,37 @@ import java.util.*
 @Entity(tableName = "poi_table")
 data class PointOfInterest(
     @PrimaryKey val id: Long,
-    val name: String,
+    @Embedded val mapLocation: MapLocation,
+    val name: String?,
     val poiType: String,
+    @Embedded val reviewSummary: ReviewSummary?
 )
 
-data class PointOfInterestAndMapLocationAndReviewSummary(
-    @Embedded val pointOfInterest: PointOfInterest,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "pointOfInterestId"
-    )
-    val mapLocation: MapLocation,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "pointOfInterestId"
-    )
-    val reviewSummary: ReviewSummary
-)
-
-@Entity(tableName = "review_table")
-data class Review(
-    @PrimaryKey val id: Long,
-    val rating: Double,
-    val poiId: Long,
-    val title: String,
-    val comment: String,
-    val date: Date
-)
-
-@Entity(tableName = "map_location_table", primaryKeys = ["latitude", "longitude"])
 data class MapLocation(
     val latitude: Double,
-    val longitude: Double,
-    val pointOfInterestId: Long
+    val longitude: Double
 )
 
-@Entity(tableName = "review_summary_table", primaryKeys = ["averageRating", "numberOfReviews", "pointOfInterestId"])
 data class ReviewSummary(
     val averageRating: Double,
-    val numberOfReviews: Int,
-    val pointOfInterestId: Long
+    val numberOfReviews: Int
+)
+
+@Entity
+data class Review(
+    @PrimaryKey val id: Long,
+    val poiId: Long,
+    val rating: Double,
+    val title: String,
+    val text: String
+)
+
+data class PoiWithReviews(
+    @Embedded val poi: PointOfInterest,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "poiId"
+    )
+
+    val reviews: List<Review>
 )

@@ -7,6 +7,7 @@ import android.widget.RatingBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,70 +16,63 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.garmin.garminkaptain.KaptainApplication
 import com.garmin.garminkaptain.R
 import com.garmin.garminkaptain.data.Review
-import com.garmin.garminkaptain.data.reviewList
 import com.garmin.garminkaptain.viewModel.PoiViewModel
-import com.garmin.garminkaptain.viewModel.PoiViewModelFactory
+import com.garmin.garminkaptain.viewModel.ReviewViewModel
 
-class PoiReviewsFragment : Fragment(R.layout.poi_review_fragment) {
+class PoiReviewFragment : Fragment(R.layout.fragment_poi_review) {
 
-    private val args: PoiDetailsFragmentArgs by navArgs()
-
-    inner class PoiReviewsItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val titleView = itemView.findViewById<TextView>(R.id.poi_item_title_view)
-        private val dateView = itemView.findViewById<TextView>(R.id.poi_item_date_view)
-        private val commentView = itemView.findViewById<TextView>(R.id.poi_item_comment_view)
-        private val ratingBar = itemView.findViewById<RatingBar>(R.id.poi_rating_view)
+    inner class PoiReviewViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val ratingView = itemView.findViewById<RatingBar>(R.id.poi_review_rating_bar)
+        private val titleView = itemView.findViewById<TextView>(R.id.poi_review_title)
+        private val textView = itemView.findViewById<TextView>(R.id.poi_review_text)
 
         fun bind(review: Review) {
+            ratingView.rating = review.rating.toFloat()
             titleView.text = review.title
-            dateView.text = review.date.toString()
-            commentView.text = review.comment
-            ratingBar.rating = review.rating.toFloat()
+            textView.text = review.text
         }
     }
 
-    inner class PoiReviewsAdapter : RecyclerView.Adapter<PoiReviewsItemViewHolder>() {
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int
-        ): PoiReviewsItemViewHolder {
-            return PoiReviewsItemViewHolder(
-                layoutInflater.inflate(R.layout.poi_review_list_item, parent, false)
+    inner class PoiReviewsAdapter : RecyclerView.Adapter<PoiReviewViewHolder>() {
+        private var reviewList: List<Review>? = null
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PoiReviewViewHolder {
+            return PoiReviewViewHolder(
+                layoutInflater.inflate(
+                    R.layout.poi_review_item,
+                    parent,
+                    false
+                )
             )
         }
 
-        override fun onBindViewHolder(holder: PoiReviewsItemViewHolder, position: Int) {
-            reviews.getOrNull(position)?.let {
-                holder.bind(it)
-            }
+        override fun onBindViewHolder(holder: PoiReviewViewHolder, position: Int) {
+            reviewList?.getOrNull(position)?.let { holder.bind(it) }
         }
 
-        override fun getItemCount(): Int = reviews.size
+        override fun getItemCount(): Int = reviewList?.size ?: 0
 
+        fun updateData(reviews: List<Review>) {
+            reviewList = reviews
+            notifyDataSetChanged()
+        }
     }
 
-    private var reviews = listOf<Review>()
-    private var adapter = PoiReviewsAdapter()
-    private val viewModel: PoiViewModel by activityViewModels { PoiViewModelFactory((activity?.application as KaptainApplication).repository) }
+    private val args by navArgs<PoiDetailsFragmentArgs>()
+
+    private val model: ReviewViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        view.findViewById<RecyclerView>(R.id.poi_reviews_list).apply {
+        val reviewAdapter = PoiReviewsAdapter()
+        view.findViewById<RecyclerView>(R.id.poi_review_list).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
-            adapter = this@PoiReviewsFragment.adapter
+            adapter = reviewAdapter
         }
-
-        val swipeRefreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.swipeToRefreshReview)
-        swipeRefreshLayout.setOnRefreshListener { viewModel.loadPoiList() }
-
-        viewModel.getLoading()
-            .observe(viewLifecycleOwner, Observer { swipeRefreshLayout.isRefreshing = it })
-
-        viewModel.getReviewList(args.poiId).observe(viewLifecycleOwner, Observer {
-            it?.let {
-                reviews = it
-                adapter.notifyDataSetChanged()
-            }
+        model.reviewLiveData.observe(viewLifecycleOwner, {
+            reviewAdapter.updateData(it)
         })
+
+        model.getReviews(args.poiId)
     }
 }

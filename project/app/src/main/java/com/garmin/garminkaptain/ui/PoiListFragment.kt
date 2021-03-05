@@ -1,6 +1,9 @@
 package com.garmin.garminkaptain.ui
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -9,29 +12,29 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.garmin.garminkaptain.KaptainApplication
 import com.garmin.garminkaptain.R
-import com.garmin.garminkaptain.data.PointOfInterestAndMapLocationAndReviewSummary
+import com.garmin.garminkaptain.TAG
+import com.garmin.garminkaptain.data.PointOfInterest
+import com.garmin.garminkaptain.data.Resource
 import com.garmin.garminkaptain.viewModel.PoiViewModel
-import com.garmin.garminkaptain.viewModel.PoiViewModelFactory
 
 
-class PoiListFragment : Fragment(R.layout.poi_list_fragment) {
+class PoiListFragment : Fragment(R.layout.poi_list_fragment),
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
     inner class PoiListItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val nameView = itemView.findViewById<TextView>(R.id.poi_item_name_view)
         private val typeView = itemView.findViewById<TextView>(R.id.poi_item_type_view)
 
-        fun bind(poi: PointOfInterestAndMapLocationAndReviewSummary) {
-            nameView.text = poi.pointOfInterest.name
-            typeView.text = poi.pointOfInterest.poiType
+        fun bind(poi: PointOfInterest) {
+            nameView.text = poi.name
+            typeView.text = poi.poiType
             itemView.setOnClickListener {
                 findNavController().navigate(
-                    PoiListFragmentDirections.actionPoiListFragmentToPoiDetailsFragment(poi.pointOfInterest.id)
+                    PoiListFragmentDirections.actionPoiListFragmentToPoiDetailsFragment(poi.id)
                 )
             }
         }
@@ -53,31 +56,10 @@ class PoiListFragment : Fragment(R.layout.poi_list_fragment) {
         override fun getItemCount(): Int = pointsOfInterest.size
     }
 
-    var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback = object :
-        ItemTouchHelper.SimpleCallback(
-            0,
-            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT or ItemTouchHelper.DOWN or ItemTouchHelper.UP
-        ) {
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-            Toast.makeText(context, "on Move", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
-            val position = viewHolder.adapterPosition
-            viewModel.removePoi(pointsOfInterest[position])
-            Toast.makeText(context, pointsOfInterest[position].pointOfInterest.name + " deleted", Toast.LENGTH_SHORT).show()
-            adapter.notifyDataSetChanged()
-        }
-    }
-
-    private var pointsOfInterest = listOf<PointOfInterestAndMapLocationAndReviewSummary>()
+    private var pointsOfInterest = listOf<PointOfInterest>()
     private var adapter = PoiListAdapter()
-    private val viewModel: PoiViewModel by activityViewModels { PoiViewModelFactory((activity?.application as KaptainApplication).repository) }
+    private val viewModel: PoiViewModel by activityViewModels()
+    private var swipeRefreshLayout: SwipeRefreshLayout? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         view.findViewById<RecyclerView>(R.id.poi_list).apply {
@@ -86,21 +68,45 @@ class PoiListFragment : Fragment(R.layout.poi_list_fragment) {
             adapter = this@PoiListFragment.adapter
         }
 
-        val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
-        itemTouchHelper.attachToRecyclerView(view.findViewById(R.id.poi_list))
+        swipeRefreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.swipeToRefresh)
+        swipeRefreshLayout?.setOnRefreshListener { viewModel.refreshPoiList() }
 
-        val swipeRefreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.swipeToRefresh)
-        swipeRefreshLayout.setOnRefreshListener { viewModel.loadPoiList() }
-
-        viewModel.getLoading()
-            .observe(viewLifecycleOwner, Observer { swipeRefreshLayout.isRefreshing = it })
-
-        viewModel.getPoiList().observe(viewLifecycleOwner, Observer {
-            it?.let {
-                pointsOfInterest = it
-                adapter.notifyDataSetChanged()
+        viewModel.getPoiListData().observe(viewLifecycleOwner, Observer { resouce ->
+            if (resouce != null) {
+                when (resouce) {
+                    is Resource.Error -> {
+                        hideProgressIndicator()
+                        Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show()
+                    }
+                    is Resource.Loading -> showProgressIndicator()
+                    is Resource.Success -> {
+                        hideProgressIndicator()
+                        if (resouce.data != null) {
+                            pointsOfInterest = resouce.data
+                            adapter.notifyDataSetChanged()
+                        }
+                    }
+                }
             }
         })
+
+        activity?.let {
+            it.getPreferences(Context.MODE_PRIVATE).registerOnSharedPreferenceChangeListener(this)
+        }
     }
 
+    private fun showProgressIndicator() {
+        swipeRefreshLayout?.isRefreshing = true
+    }
+
+    private fun hideProgressIndicator() {
+        swipeRefreshLayout?.isRefreshing = false
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        Log.d(
+            TAG, "onSharedPreferenceChanged " +
+                    "key: $key value: ${sharedPreferences.getInt(key, 0)}"
+        )
+    }
 }
